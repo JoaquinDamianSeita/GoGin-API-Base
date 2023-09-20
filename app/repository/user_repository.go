@@ -21,7 +21,7 @@ type UserRepositoryImpl struct {
 func (u UserRepositoryImpl) FindAllUser() ([]dao.User, error) {
 	var users []dao.User
 
-	var err = u.db.Preload("Role").Find(&users).Error
+	var err = u.db.Find(&users).Error
 	if err != nil {
 		log.Error("Got an error finding all couples. Error: ", err)
 		return nil, err
@@ -34,7 +34,7 @@ func (u UserRepositoryImpl) FindUserById(id int) (dao.User, error) {
 	user := dao.User{
 		ID: id,
 	}
-	err := u.db.Preload("Role").First(&user).Error
+	err := u.db.First(&user).Error
 	if err != nil {
 		log.Error("Got and error when find user by id. Error: ", err)
 		return dao.User{}, err
@@ -43,7 +43,7 @@ func (u UserRepositoryImpl) FindUserById(id int) (dao.User, error) {
 }
 
 func (u UserRepositoryImpl) Save(user *dao.User) (dao.User, error) {
-	var err = u.db.Save(user).Error
+	err := u.db.Create(&user).Error
 	if err != nil {
 		log.Error("Got an error when save user. Error: ", err)
 		return dao.User{}, err
