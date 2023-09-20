@@ -10,7 +10,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type UserService interface {
@@ -25,32 +24,14 @@ type UserServiceImpl struct {
 	userRepository repository.UserRepository
 }
 
-func (u UserServiceImpl) UpdateUserData(c *gin.Context) {
+func (u UserServiceImpl) GetAllUser(c *gin.Context) {
 	defer pkg.PanicHandler(c)
 
-	log.Info("start to execute program update user data by id")
-	userID, _ := strconv.Atoi(c.Param("userID"))
+	log.Info("start to execute get all data user")
 
-	var request dao.User
-	if err := c.ShouldBindJSON(&request); err != nil {
-		log.Error("Happened error when mapping request from FE. Error", err)
-		pkg.PanicException(constant.InvalidRequest)
-	}
-
-	data, err := u.userRepository.FindUserById(userID)
+	data, err := u.userRepository.FindAllUser()
 	if err != nil {
-		log.Error("Happened error when get data from database. Error", err)
-		pkg.PanicException(constant.DataNotFound)
-	}
-
-	data.RoleID = request.RoleID
-	data.Email = request.Email
-	data.Name = request.Password
-	data.Status = request.Status
-	u.userRepository.Save(&data)
-
-	if err != nil {
-		log.Error("Happened error when updating data to database. Error", err)
+		log.Error("Happened Error when find all user data. Error: ", err)
 		pkg.PanicException(constant.UnknownError)
 	}
 
@@ -81,11 +62,9 @@ func (u UserServiceImpl) AddUserData(c *gin.Context) {
 		log.Error("Happened error when mapping request from FE. Error", err)
 		pkg.PanicException(constant.InvalidRequest)
 	}
-
-	hash, _ := bcrypt.GenerateFromPassword([]byte(request.Password), 15)
-	request.Password = string(hash)
-
 	data, err := u.userRepository.Save(&request)
+
+	// TODO: Change this to return invalid params, this is not descriptive
 	if err != nil {
 		log.Error("Happened error when saving data to database. Error", err)
 		pkg.PanicException(constant.UnknownError)
@@ -94,14 +73,30 @@ func (u UserServiceImpl) AddUserData(c *gin.Context) {
 	c.JSON(http.StatusOK, pkg.BuildResponse(constant.Success, data))
 }
 
-func (u UserServiceImpl) GetAllUser(c *gin.Context) {
+func (u UserServiceImpl) UpdateUserData(c *gin.Context) {
 	defer pkg.PanicHandler(c)
 
-	log.Info("start to execute get all data user")
+	log.Info("start to execute program update user data by id")
+	userID, _ := strconv.Atoi(c.Param("userID"))
 
-	data, err := u.userRepository.FindAllUser()
+	var request dao.User
+	if err := c.ShouldBindJSON(&request); err != nil {
+		log.Error("Happened error when mapping request from FE. Error", err)
+		pkg.PanicException(constant.InvalidRequest)
+	}
+
+	data, err := u.userRepository.FindUserById(userID)
 	if err != nil {
-		log.Error("Happened Error when find all user data. Error: ", err)
+		log.Error("Happened error when get data from database. Error", err)
+		pkg.PanicException(constant.DataNotFound)
+	}
+
+	data.Email = request.Email
+	data.Username = request.Password
+	u.userRepository.Save(&data)
+
+	if err != nil {
+		log.Error("Happened error when updating data to database. Error", err)
 		pkg.PanicException(constant.UnknownError)
 	}
 
