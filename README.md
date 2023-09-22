@@ -24,3 +24,9 @@ DB_DSN="host=HOST user=USER password=PASSWORD dbname=DBNAME port=PORT"
 # Logging
 LOG_LEVEL=DEBUG
 ```
+
+Live Reload Golang Development With Gin:
+
+``` bash
+gin --appPort 3000 --port 8080 --immediate
+```
