@@ -1,9 +1,9 @@
-package service
+package services
 
 import (
-	"GoGin-API-Base/app/domain/dao"
-	"GoGin-API-Base/app/domain/dto"
-	"GoGin-API-Base/app/repository"
+	api_responses "GoGin-API-Base/api_responses"
+	dao "GoGin-API-Base/dao"
+	"GoGin-API-Base/repository"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -20,11 +20,11 @@ type UserServiceImpl struct {
 
 func (u UserServiceImpl) RegisterUser(c *gin.Context) {
 	var request dao.User
+
 	err := c.ShouldBindJSON(&request)
-	log.Println(err, request.Username == "", request.Email == "", request.Password == "")
 	if err != nil || request.Username == "" || request.Email == "" || request.Password == "" {
 		log.Error("Invalid parameters: ", err)
-		c.AbortWithStatusJSON(http.StatusBadRequest, dto.ApiErrorResponse{
+		c.AbortWithStatusJSON(http.StatusBadRequest, api_responses.ApiErrorResponse{
 			Error: "Invalid parameters.",
 		})
 		return
@@ -32,7 +32,7 @@ func (u UserServiceImpl) RegisterUser(c *gin.Context) {
 
 	u.userRepository.Save(&request)
 
-	c.JSON(http.StatusOK, dto.ApiMessageResponse{Message: "User successfully created."})
+	c.JSON(http.StatusOK, api_responses.ApiMessageResponse{Message: "User successfully created."})
 }
 
 func UserServiceInit(userRepository repository.UserRepository) *UserServiceImpl {
