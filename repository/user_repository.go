@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"GoGin-API-Base/app/domain/dao"
+	"GoGin-API-Base/dao"
 
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"

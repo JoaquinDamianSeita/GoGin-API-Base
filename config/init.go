@@ -1,23 +1,23 @@
 package config
 
 import (
-	"GoGin-API-Base/app/controller"
-	"GoGin-API-Base/app/repository"
-	"GoGin-API-Base/app/service"
+	"GoGin-API-Base/api/handlers"
+	"GoGin-API-Base/repository"
+	"GoGin-API-Base/services"
 )
 
 type Initialization struct {
-	userRepo repository.UserRepository
-	userSvc  service.UserService
-	UserCtrl controller.UserController
+	userRepo  repository.UserRepository
+	userSvc   services.UserService
+	UserHdler handlers.UserHandler
 }
 
 func NewInitialization(userRepo repository.UserRepository,
-	userService service.UserService,
-	userCtrl controller.UserController) *Initialization {
+	userService services.UserService,
+	UserHdler handlers.UserHandler) *Initialization {
 	return &Initialization{
-		userRepo: userRepo,
-		userSvc:  userService,
-		UserCtrl: userCtrl,
+		userRepo:  userRepo,
+		userSvc:   userService,
+		UserHdler: UserHdler,
 	}
 }

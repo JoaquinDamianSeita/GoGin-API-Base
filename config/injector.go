@@ -5,28 +5,28 @@
 package config
 
 import (
-	"GoGin-API-Base/app/controller"
-	"GoGin-API-Base/app/repository"
-	"GoGin-API-Base/app/service"
+	"GoGin-API-Base/api/handlers"
+	"GoGin-API-Base/repository"
+	"GoGin-API-Base/services"
 
 	"github.com/google/wire"
 )
 
 var db = wire.NewSet(ConnectToDB)
 
-var userServiceSet = wire.NewSet(service.UserServiceInit,
-	wire.Bind(new(service.UserService), new(*service.UserServiceImpl)),
+var userServiceSet = wire.NewSet(services.UserServiceInit,
+	wire.Bind(new(services.UserService), new(*services.UserServiceImpl)),
 )
 
 var userRepoSet = wire.NewSet(repository.UserRepositoryInit,
 	wire.Bind(new(repository.UserRepository), new(*repository.UserRepositoryImpl)),
 )
 
-var userCtrlSet = wire.NewSet(controller.UserControllerInit,
-	wire.Bind(new(controller.UserController), new(*controller.UserControllerImpl)),
+var userHdlerSet = wire.NewSet(handlers.UserHandlerInit,
+	wire.Bind(new(handlers.UserHandler), new(*handlers.UserHandlerImpl)),
 )
 
 func Init() *Initialization {
-	wire.Build(NewInitialization, db, userCtrlSet, userServiceSet, userRepoSet)
+	wire.Build(NewInitialization, db, userHdlerSet, userServiceSet, userRepoSet)
 	return nil
 }
