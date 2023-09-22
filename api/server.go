@@ -2,6 +2,7 @@ package api
 
 import (
 	"GoGin-API-Base/api/middleware"
+	"GoGin-API-Base/api/routes"
 	"GoGin-API-Base/config"
 
 	"github.com/gin-gonic/gin"
@@ -15,10 +16,7 @@ func Init(init *config.Initialization) *gin.Engine {
 	router.Use(middleware.ErrorHandler())
 
 	api := router.Group("/api")
-	{
-		user := api.Group("/users")
-		user.POST("", init.UserHdler.RegisterUser)
-	}
+	routes.RegisterUserRoutes(api)
 
 	return router
 }
