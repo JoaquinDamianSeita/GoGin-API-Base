@@ -1,0 +1,17 @@
+package routes
+
+import (
+	"GoGin-API-Base/config"
+
+	"github.com/gin-gonic/gin"
+)
+
+func RegisterUserRoutes(router *gin.RouterGroup) {
+	init := config.Init()
+
+	user := router.Group("/users")
+	{
+		user.POST("", init.UserHdler.RegisterUser)
+	}
+
+}
