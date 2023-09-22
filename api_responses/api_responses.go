@@ -1,4 +1,4 @@
-package tools
+package responses_utils
 
 type ApiErrorResponse struct {
 	Error string `json:"error"`
