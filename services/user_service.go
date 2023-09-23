@@ -4,6 +4,7 @@ import (
 	"GoGin-API-Base/api/auth"
 	dao "GoGin-API-Base/dao"
 	"GoGin-API-Base/repository"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -65,7 +66,7 @@ func (u UserServiceImpl) LoginUser(c *gin.Context) {
 		return
 	}
 
-	expiresIn, tokenString, err := auth.GenerateJWT(user.Email, user.Username)
+	expiresIn, tokenString, err := auth.GenerateJWT(fmt.Sprint(user.ID))
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
