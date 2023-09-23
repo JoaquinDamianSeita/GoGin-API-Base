@@ -1,6 +1,7 @@
 package services
 
 import (
+	"GoGin-API-Base/api/auth"
 	dao "GoGin-API-Base/dao"
 	"GoGin-API-Base/repository"
 	"net/http"
@@ -33,10 +34,9 @@ func (u UserServiceImpl) RegisterUser(c *gin.Context) {
 		return
 	}
 
-	// TODO: Add email uniq validation and error response
 	_, recordError := u.userRepository.Save(&request)
 	if recordError != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": recordError})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": recordError.Error()})
 		return
 	}
 
@@ -55,7 +55,7 @@ func (u UserServiceImpl) LoginUser(c *gin.Context) {
 
 	user, recordError := u.userRepository.FindUserByEmail(request.Email)
 	if recordError != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": recordError})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "invalid credentials"})
 		return
 	}
 
@@ -65,16 +65,12 @@ func (u UserServiceImpl) LoginUser(c *gin.Context) {
 		return
 	}
 
-	// TODO: Add token generation for user
-	// tokenString, err:= auth.GenerateJWT(user.Email, user.Username)
-	// if err != nil {
-	// 	context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-	// 	context.Abort()
-	// 	return
-	// }
-	// context.JSON(http.StatusOK, gin.H{"token": tokenString})
-
-	c.JSON(http.StatusOK, gin.H{"token": "dasdasdasdas", "expires_in": 123145})
+	expiresIn, tokenString, err := auth.GenerateJWT(user.Email, user.Username)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"token": tokenString, "expires_in": expiresIn})
 }
 
 func UserServiceInit(userRepository repository.UserRepository) *UserServiceImpl {

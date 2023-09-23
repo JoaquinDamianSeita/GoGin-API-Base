@@ -2,7 +2,9 @@ package repository
 
 import (
 	"GoGin-API-Base/dao"
+	"errors"
 
+	"github.com/jackc/pgx/v5/pgconn"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
@@ -43,9 +45,21 @@ func (u UserRepositoryImpl) Save(user *dao.User) (dao.User, error) {
 	err := u.db.Create(&user).Error
 	if err != nil {
 		log.Error("User not created. Error: ", err)
-		return dao.User{}, err
+		processedError := ProcessError(err)
+		return dao.User{}, processedError
 	}
 	return *user, nil
+}
+
+func ProcessError(err error) error {
+	pgErrCode := err.(*pgconn.PgError).Code
+	processedError := err
+
+	if pgErrCode == "23505" {
+		processedError = errors.New("el email o el usuario ya esta en uso")
+	}
+
+	return processedError
 }
 
 func UserRepositoryInit(db *gorm.DB) *UserRepositoryImpl {
