@@ -7,8 +7,8 @@ import (
 
 type User struct {
 	ID       int    `gorm:"column:id; primary_key; not null" json:"id"`
-	Username string `gorm:"column:name" json:"username"`
-	Email    string `gorm:"column:email" json:"email"`
+	Username string `gorm:"column:username; unique" json:"username"`
+	Email    string `gorm:"column:email; unique" json:"email"`
 	Password string `gorm:"column:password" json:"password"`
 	BaseModel
 }
@@ -21,5 +21,13 @@ func (u *User) BeforeSave(tx *gorm.DB) (err error) {
 
 	u.Password = string(hashedPassword)
 
+	return nil
+}
+
+func (user *User) CheckPassword(providedPassword string) error {
+	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(providedPassword))
+	if err != nil {
+		return err
+	}
 	return nil
 }

@@ -12,6 +12,7 @@ func RegisterUserRoutes(router *gin.RouterGroup) {
 	user := router.Group("/users")
 	{
 		user.POST("", init.UserHdler.RegisterUser)
+		user.POST("/login", init.UserHdler.LoginUser)
 	}
 
 }

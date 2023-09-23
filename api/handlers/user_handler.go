@@ -8,6 +8,7 @@ import (
 
 type UserHandler interface {
 	RegisterUser(c *gin.Context)
+	LoginUser(c *gin.Context)
 }
 
 type UserHandlerImpl struct {
@@ -16,6 +17,10 @@ type UserHandlerImpl struct {
 
 func (u UserHandlerImpl) RegisterUser(c *gin.Context) {
 	u.svc.RegisterUser(c)
+}
+
+func (u UserHandlerImpl) LoginUser(c *gin.Context) {
+	u.svc.LoginUser(c)
 }
 
 func UserHandlerInit(userService services.UserService) *UserHandlerImpl {
