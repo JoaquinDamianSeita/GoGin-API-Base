@@ -56,7 +56,7 @@ func ProcessError(err error) error {
 	processedError := err
 
 	if pgErrCode == "23505" {
-		processedError = errors.New("el email o el usuario ya esta en uso")
+		processedError = errors.New("the email or the user is already in use")
 	}
 
 	return processedError
