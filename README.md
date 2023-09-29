@@ -6,6 +6,12 @@ run with:
 go run .
 ```
 
+test with:
+
+``` bash
+go test ./...
+```
+
 Generate wire file:
 ``` bash
 wire gen GoGin-API-Base/config
