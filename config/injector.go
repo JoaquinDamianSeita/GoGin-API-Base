@@ -5,6 +5,7 @@
 package config
 
 import (
+	"GoGin-API-Base/api/auth"
 	"GoGin-API-Base/api/handlers"
 	"GoGin-API-Base/repository"
 	"GoGin-API-Base/services"
@@ -16,6 +17,8 @@ var db = wire.NewSet(ConnectToDB)
 
 var userServiceSet = wire.NewSet(services.UserServiceInit,
 	wire.Bind(new(services.UserService), new(*services.UserServiceImpl)),
+	auth.AuthInit,
+	wire.Bind(new(auth.Auth), new(*auth.AuthImpl)),
 )
 
 var userRepoSet = wire.NewSet(repository.UserRepositoryInit,

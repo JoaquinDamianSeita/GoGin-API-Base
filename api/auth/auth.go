@@ -15,7 +15,14 @@ type JWTClaim struct {
 	jwt.StandardClaims
 }
 
-func GenerateJWT(userId string) (expiresIn int64, tokenString string, err error) {
+type Auth interface {
+	GenerateJWT(userId string) (expiresIn int64, tokenString string, err error)
+	ValidateToken(signedToken string) (err error)
+}
+
+type AuthImpl struct{}
+
+func (auth AuthImpl) GenerateJWT(userId string) (expiresIn int64, tokenString string, err error) {
 	expirationTime := time.Now().Add(1 * time.Hour)
 	claims := &JWTClaim{
 		UserID: userId,
@@ -28,7 +35,8 @@ func GenerateJWT(userId string) (expiresIn int64, tokenString string, err error)
 	tokenString, err = token.SignedString(jwtKey)
 	return
 }
-func ValidateToken(signedToken string) (err error) {
+
+func (auth AuthImpl) ValidateToken(signedToken string) (err error) {
 	token, err := jwt.ParseWithClaims(
 		signedToken,
 		&JWTClaim{},
@@ -49,4 +57,8 @@ func ValidateToken(signedToken string) (err error) {
 		return
 	}
 	return
+}
+
+func AuthInit() *AuthImpl {
+	return &AuthImpl{}
 }

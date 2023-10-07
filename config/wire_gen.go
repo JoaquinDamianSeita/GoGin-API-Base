@@ -7,6 +7,7 @@
 package config
 
 import (
+	"GoGin-API-Base/api/auth"
 	"GoGin-API-Base/api/handlers"
 	"GoGin-API-Base/repository"
 	"GoGin-API-Base/services"
@@ -18,9 +19,10 @@ import (
 func Init() *Initialization {
 	gormDB := ConnectToDB()
 	userRepositoryImpl := repository.UserRepositoryInit(gormDB)
-	userServiceImpl := services.UserServiceInit(userRepositoryImpl)
+	authImpl := auth.AuthInit()
+	userServiceImpl := services.UserServiceInit(userRepositoryImpl, authImpl)
 	userHandlerImpl := handlers.UserHandlerInit(userServiceImpl)
-	initialization := NewInitialization(userRepositoryImpl, userServiceImpl, userHandlerImpl)
+	initialization := NewInitialization(userRepositoryImpl, userServiceImpl, userHandlerImpl, authImpl)
 	return initialization
 }
 
@@ -28,7 +30,7 @@ func Init() *Initialization {
 
 var db = wire.NewSet(ConnectToDB)
 
-var userServiceSet = wire.NewSet(services.UserServiceInit, wire.Bind(new(services.UserService), new(*services.UserServiceImpl)))
+var userServiceSet = wire.NewSet(services.UserServiceInit, wire.Bind(new(services.UserService), new(*services.UserServiceImpl)), auth.AuthInit, wire.Bind(new(auth.Auth), new(*auth.AuthImpl)))
 
 var userRepoSet = wire.NewSet(repository.UserRepositoryInit, wire.Bind(new(repository.UserRepository), new(*repository.UserRepositoryImpl)))
 
