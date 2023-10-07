@@ -3,7 +3,6 @@ package handlers
 import (
 	"GoGin-API-Base/dao"
 	testhelpers "GoGin-API-Base/test_helpers"
-	"log"
 	"net/http"
 	"testing"
 
@@ -19,8 +18,6 @@ func (m *MockUserService) RegisterUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid parameters."})
 		return
 	}
-
-	log.Println(request.Username, request.Email)
 
 	if request.Username == "invalid.user" || request.Email == "invalid.user@example.com" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "the email or the user is already in use"})

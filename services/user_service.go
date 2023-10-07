@@ -18,6 +18,7 @@ type UserService interface {
 
 type UserServiceImpl struct {
 	userRepository repository.UserRepository
+	auth           auth.Auth
 }
 
 type LoginRequest struct {
@@ -66,7 +67,7 @@ func (u UserServiceImpl) LoginUser(c *gin.Context) {
 		return
 	}
 
-	expiresIn, tokenString, err := auth.GenerateJWT(fmt.Sprint(user.ID))
+	expiresIn, tokenString, err := u.auth.GenerateJWT(fmt.Sprint(user.ID))
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -74,8 +75,9 @@ func (u UserServiceImpl) LoginUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"token": tokenString, "expires_in": expiresIn})
 }
 
-func UserServiceInit(userRepository repository.UserRepository) *UserServiceImpl {
+func UserServiceInit(userRepository repository.UserRepository, auth auth.Auth) *UserServiceImpl {
 	return &UserServiceImpl{
 		userRepository: userRepository,
+		auth:           auth,
 	}
 }
