@@ -12,6 +12,12 @@ test with:
 go test ./...
 ```
 
+clean test cache:
+
+``` bash
+go clean -testcache
+```
+
 Generate wire file:
 ``` bash
 wire gen GoGin-API-Base/config
@@ -26,6 +32,7 @@ APPLICATION_NAME=GoGin-API-Base
 
 # Database
 DB_DSN="host=HOST user=USER password=PASSWORD dbname=DBNAME port=PORT"
+DB_DSN_TEST="host=HOST user=USER password=PASSWORD dbname=DBNAME port=PORT"
 
 # Logging
 LOG_LEVEL=DEBUG

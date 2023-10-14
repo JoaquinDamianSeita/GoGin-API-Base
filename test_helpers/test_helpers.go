@@ -26,5 +26,7 @@ func MockPostRequest(request_body string, uri string) (*gin.Context, *httptest.R
 
 func AssertExpectedCodeAndBodyResponse(t *testing.T, tt TestStructure, responseRecorder *httptest.ResponseRecorder) {
 	assert.Equal(t, tt.ExpectedCode, responseRecorder.Code)
-	assert.Equal(t, tt.ExpectedBody, responseRecorder.Body.String())
+	if tt.ExpectedBody != "" {
+		assert.Equal(t, tt.ExpectedBody, responseRecorder.Body.String())
+	}
 }

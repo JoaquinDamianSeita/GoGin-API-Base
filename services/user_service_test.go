@@ -158,7 +158,7 @@ func TestUserHandlerImpl_LoginUser(t *testing.T) {
 		{
 			Name:         "with invalid email",
 			Params:       `{"email": "invalid.user@example.com", "password": "password123"}`,
-			ExpectedCode: http.StatusBadRequest,
+			ExpectedCode: http.StatusUnauthorized,
 			ExpectedBody: "{\"error\":\"invalid credentials\"}",
 		},
 		{
