@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      DB_DSN_TEST: "host=localhost user=root password=root dbname=gogin-api-base-test port=5432"
+      DB_DSN_TEST: "host=127.0.0.1 user=root password=root dbname=gogin-api-base-test port=5432"
 
     services:
       postgres:
