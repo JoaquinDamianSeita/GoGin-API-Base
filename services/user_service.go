@@ -57,7 +57,7 @@ func (u UserServiceImpl) LoginUser(c *gin.Context) {
 
 	user, recordError := u.userRepository.FindUserByEmail(request.Email)
 	if recordError != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "invalid credentials"})
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
 		return
 	}
 
