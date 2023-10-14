@@ -27,7 +27,12 @@ jobs:
       if: runner.os == 'Linux'
 
     - name: Start PostgreSQL
-      run: sudo service postgresql start
+      run: |
+        export DB_DSN_TEST="${{ secrets.DB_DSN_TEST }}"
+      
+        psql "$DB_DSN_TEST" -f .github/sql/init_test_db.sql
+      env:
+        DB_DSN_TEST: ${{ secrets.DB_DSN_TEST }}
       if: runner.os == 'Linux'
 
     - name: Build
