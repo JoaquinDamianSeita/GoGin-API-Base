@@ -26,6 +26,8 @@ wire gen GoGin-API-Base/config
 .env:
 
 ``` go
+
+# Port
 PORT=8080
 
 # Application
