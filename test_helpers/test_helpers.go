@@ -24,6 +24,13 @@ func MockPostRequest(request_body string, uri string) (*gin.Context, *httptest.R
 	return ctx, responseRecorder
 }
 
+func MockGetRequest(uri string) (*gin.Context, *httptest.ResponseRecorder) {
+	responseRecorder := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(responseRecorder)
+	ctx.Request = httptest.NewRequest("GET", uri, nil)
+	return ctx, responseRecorder
+}
+
 func AssertExpectedCodeAndBodyResponse(t *testing.T, tt TestStructure, responseRecorder *httptest.ResponseRecorder) {
 	assert.Equal(t, tt.ExpectedCode, responseRecorder.Code)
 	if tt.ExpectedBody != "" {

@@ -1,6 +1,7 @@
 package services
 
 import (
+	auth "GoGin-API-Base/api/auth"
 	dao "GoGin-API-Base/dao"
 	testhelpers "GoGin-API-Base/test_helpers"
 	"errors"
@@ -43,7 +44,9 @@ func (auth *MockAuth) GenerateJWT(userId string) (expiresIn int64, tokenString s
 	return 3600, "token", nil
 }
 
-func (auth *MockAuth) ValidateToken(signedToken string) (err error) { return nil }
+func (auth *MockAuth) ValidateToken(signedToken string) (claims *auth.JWTClaim, err error) {
+	return nil, nil
+}
 
 func TestUserServiceImpl_RegisterUser(t *testing.T) {
 	userRepository := &MockUserRepository{}

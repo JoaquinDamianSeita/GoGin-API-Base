@@ -4,6 +4,7 @@ import (
 	"GoGin-API-Base/dao"
 	testhelpers "GoGin-API-Base/test_helpers"
 	"net/http"
+	"strconv"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -41,6 +42,17 @@ func (m *MockUserService) LoginUser(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
+}
+
+func (m *MockUserService) CurrentUser(c *gin.Context) {
+	userID, _ := strconv.Atoi(c.GetString("user_id"))
+
+	if userID != 1 {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Not authorized"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"username": "test.user", "email": "test@example.com"})
 }
 
 func TestUserHandlerImpl_RegisterUser(t *testing.T) {
@@ -169,6 +181,42 @@ func TestUserHandlerImpl_LoginUser(t *testing.T) {
 			ctx, responseRecorder := testhelpers.MockPostRequest(tt.Params, serviceUri)
 
 			userHandler.LoginUser(ctx)
+
+			testhelpers.AssertExpectedCodeAndBodyResponse(t, tt, responseRecorder)
+		})
+	}
+}
+
+func TestUserHandlerImpl_CurrentUser(t *testing.T) {
+	userService := &MockUserService{}
+	userHandler := UserHandlerInit(userService)
+	serviceUri := "/api/users/current"
+
+	var tests = []testhelpers.TestStructure{
+		{
+			Name:         "when the request is successful",
+			Params:       "",
+			ExpectedCode: http.StatusOK,
+			ExpectedBody: "{\"email\":\"test@example.com\",\"username\":\"test.user\"}",
+		},
+		{
+			Name:         "when user does not exists",
+			Params:       "",
+			ExpectedCode: http.StatusUnauthorized,
+			ExpectedBody: "{\"error\":\"Not authorized\"}",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.Name, func(t *testing.T) {
+			ctx, responseRecorder := testhelpers.MockGetRequest(serviceUri)
+
+			if tt.Name == "when the request is successful" {
+				ctx.Set("user_id", "1")
+			} else {
+				ctx.Set("user_id", "2")
+			}
+
+			userHandler.CurrentUser(ctx)
 
 			testhelpers.AssertExpectedCodeAndBodyResponse(t, tt, responseRecorder)
 		})
