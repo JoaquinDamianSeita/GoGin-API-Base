@@ -17,7 +17,7 @@ type JWTClaim struct {
 
 type Auth interface {
 	GenerateJWT(userId string) (expiresIn int64, tokenString string, err error)
-	ValidateToken(signedToken string) (err error)
+	ValidateToken(signedToken string) (claims *JWTClaim, err error)
 }
 
 type AuthImpl struct{}
@@ -36,7 +36,7 @@ func (auth AuthImpl) GenerateJWT(userId string) (expiresIn int64, tokenString st
 	return
 }
 
-func (auth AuthImpl) ValidateToken(signedToken string) (err error) {
+func (auth AuthImpl) ValidateToken(signedToken string) (claims *JWTClaim, err error) {
 	token, err := jwt.ParseWithClaims(
 		signedToken,
 		&JWTClaim{},
@@ -45,18 +45,18 @@ func (auth AuthImpl) ValidateToken(signedToken string) (err error) {
 		},
 	)
 	if err != nil {
-		return
+		return nil, err
 	}
 	claims, ok := token.Claims.(*JWTClaim)
 	if !ok {
 		err = errors.New("couldn't parse claims")
-		return
+		return nil, err
 	}
 	if claims.ExpiresAt < time.Now().Local().Unix() {
 		err = errors.New("token expired")
-		return
+		return nil, err
 	}
-	return
+	return claims, nil
 }
 
 func AuthInit() *AuthImpl {

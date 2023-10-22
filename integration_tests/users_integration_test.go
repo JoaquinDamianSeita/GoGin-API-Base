@@ -2,6 +2,7 @@ package integration_tests
 
 import (
 	"GoGin-API-Base/api"
+	"GoGin-API-Base/api/auth"
 	"GoGin-API-Base/config"
 	"GoGin-API-Base/dao"
 	"GoGin-API-Base/repository"
@@ -9,6 +10,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -20,6 +22,7 @@ import (
 )
 
 var db *gorm.DB
+var token string
 
 func TestMain(m *testing.M) {
 	db = InitTest()
@@ -43,11 +46,13 @@ func cleanDB() {
 func setupTest() *gin.Engine {
 	fmt.Println("Before Test Execution.")
 	userRepositoryImpl := repository.UserRepositoryInit(db)
-	userRepositoryImpl.Save(&dao.User{
+	user, _ := userRepositoryImpl.Save(&dao.User{
 		Username: "pedro.fuentes",
 		Email:    "pedro.fuentes@gmail.com",
 		Password: "password123",
 	})
+	authService := auth.AuthInit()
+	_, token, _ = authService.GenerateJWT(fmt.Sprintf(strconv.Itoa(user.ID)))
 	init := config.Init()
 	return api.Init(init)
 }
@@ -202,6 +207,53 @@ func TestUsersIntegration_Register_InvalidRequest(t *testing.T) {
 		t.Run(tt.Name, func(t *testing.T) {
 			request, _ := http.NewRequest("POST", "/api/users", strings.NewReader(tt.Params))
 			request.Header.Set("Content-Type", "application/json")
+
+			responseRecorder := httptest.NewRecorder()
+			router.ServeHTTP(responseRecorder, request)
+
+			testhelpers.AssertExpectedCodeAndBodyResponse(t, tt, responseRecorder)
+		})
+	}
+	teardownTest()
+}
+
+func TestUsersIntegration_Current_ValidRequest(t *testing.T) {
+	router := setupTest()
+	var tests = []testhelpers.TestStructure{
+		{
+			Name:         "when the request is successful",
+			Params:       "",
+			ExpectedCode: http.StatusOK,
+			ExpectedBody: "{\"email\":\"pedro.fuentes@gmail.com\",\"username\":\"pedro.fuentes\"}",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.Name, func(t *testing.T) {
+			request, _ := http.NewRequest("GET", "/api/users/current", strings.NewReader(tt.Params))
+			request.Header.Set("Authorization", "Bearer " + token)
+
+			responseRecorder := httptest.NewRecorder()
+			router.ServeHTTP(responseRecorder, request)
+
+			testhelpers.AssertExpectedCodeAndBodyResponse(t, tt, responseRecorder)
+		})
+	}
+	teardownTest()
+}
+
+func TestUsersIntegration_Current_InvalidRequest(t *testing.T) {
+	router := setupTest()
+	var tests = []testhelpers.TestStructure{
+		{
+			Name:         "when user does not exists",
+			Params:       "",
+			ExpectedCode: http.StatusUnauthorized,
+			ExpectedBody: "{\"error\":\"Not authorized\"}",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.Name, func(t *testing.T) {
+			request, _ := http.NewRequest("GET", "/api/users/current", strings.NewReader(tt.Params))
 
 			responseRecorder := httptest.NewRecorder()
 			router.ServeHTTP(responseRecorder, request)

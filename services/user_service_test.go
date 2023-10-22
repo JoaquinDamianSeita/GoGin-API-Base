@@ -1,6 +1,7 @@
 package services
 
 import (
+	auth "GoGin-API-Base/api/auth"
 	dao "GoGin-API-Base/dao"
 	testhelpers "GoGin-API-Base/test_helpers"
 	"errors"
@@ -19,7 +20,15 @@ func (m *MockUserRepository) Save(user *dao.User) (dao.User, error) {
 }
 
 func (m *MockUserRepository) FindUserById(id int) (dao.User, error) {
-	return dao.User{}, nil
+	if id == 1 {
+		return dao.User{
+			ID:       1,
+			Username: "test.user",
+			Email:    "test.user@example.com",
+		}, nil
+	} else {
+		return dao.User{}, errors.New("User not found.")
+	}
 }
 
 func (m *MockUserRepository) FindUserByEmail(email string) (dao.User, error) {
@@ -43,7 +52,9 @@ func (auth *MockAuth) GenerateJWT(userId string) (expiresIn int64, tokenString s
 	return 3600, "token", nil
 }
 
-func (auth *MockAuth) ValidateToken(signedToken string) (err error) { return nil }
+func (auth *MockAuth) ValidateToken(signedToken string) (claims *auth.JWTClaim, err error) {
+	return nil, nil
+}
 
 func TestUserServiceImpl_RegisterUser(t *testing.T) {
 	userRepository := &MockUserRepository{}
@@ -173,6 +184,43 @@ func TestUserHandlerImpl_LoginUser(t *testing.T) {
 			ctx, responseRecorder := testhelpers.MockPostRequest(tt.Params, serviceUri)
 
 			userService.LoginUser(ctx)
+
+			testhelpers.AssertExpectedCodeAndBodyResponse(t, tt, responseRecorder)
+		})
+	}
+}
+
+func TestUserHandlerImpl_CurrentUser(t *testing.T) {
+	userRepository := &MockUserRepository{}
+	auth := &MockAuth{}
+	userService := UserServiceInit(userRepository, auth)
+	serviceUri := "/api/users/current"
+
+	var tests = []testhelpers.TestStructure{
+		{
+			Name:         "when the request is successful",
+			Params:       "",
+			ExpectedCode: http.StatusOK,
+			ExpectedBody: "{\"email\":\"test.user@example.com\",\"username\":\"test.user\"}",
+		},
+		{
+			Name:         "when user does not exists",
+			Params:       "",
+			ExpectedCode: http.StatusUnauthorized,
+			ExpectedBody: "{\"error\":\"Not authorized\"}",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.Name, func(t *testing.T) {
+			ctx, responseRecorder := testhelpers.MockGetRequest(serviceUri)
+
+			if tt.Name == "when the request is successful" {
+				ctx.Set("user_id", "1")
+			} else {
+				ctx.Set("user_id", "2")
+			}
+
+			userService.CurrentUser(ctx)
 
 			testhelpers.AssertExpectedCodeAndBodyResponse(t, tt, responseRecorder)
 		})

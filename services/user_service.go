@@ -6,14 +6,15 @@ import (
 	"GoGin-API-Base/repository"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 )
 
 type UserService interface {
 	RegisterUser(c *gin.Context)
 	LoginUser(c *gin.Context)
+	CurrentUser(c *gin.Context)
 }
 
 type UserServiceImpl struct {
@@ -31,7 +32,6 @@ func (u UserServiceImpl) RegisterUser(c *gin.Context) {
 
 	validationError := c.ShouldBindJSON(&request)
 	if validationError != nil || request.Username == "" || request.Email == "" || request.Password == "" {
-		log.Error("Invalid parameters: ", validationError)
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Invalid parameters."})
 		return
 	}
@@ -50,7 +50,6 @@ func (u UserServiceImpl) LoginUser(c *gin.Context) {
 	var user dao.User
 	validationError := c.ShouldBindJSON(&request)
 	if validationError != nil || request.Email == "" || request.Password == "" {
-		log.Error("Invalid parameters: ", validationError)
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Invalid parameters."})
 		return
 	}
@@ -73,6 +72,19 @@ func (u UserServiceImpl) LoginUser(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"token": tokenString, "expires_in": expiresIn})
+}
+
+func (u UserServiceImpl) CurrentUser(c *gin.Context) {
+	var user dao.User
+	userID, _ := strconv.Atoi(c.GetString("user_id"))
+	user, recordError := u.userRepository.FindUserById(userID)
+
+	if recordError != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Not authorized"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"email": user.Email, "username": user.Username})
 }
 
 func UserServiceInit(userRepository repository.UserRepository, auth auth.Auth) *UserServiceImpl {
